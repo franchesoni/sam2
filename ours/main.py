@@ -27,10 +27,7 @@ def main(img_ind=0):
         None, img, mask_generator
     )
     print("- making logits c1")
-    c1logits = []
-    for ind, logit in enumerate(logits):
-        print(ind, "of", len(logits), end="\r")
-        c1logits.append(adjust_logit_map_numba(logit))
+    c1logits = adjust_logit_map_numba(logits)
     print("- saving logits c1")
     Path("ours/tmp").mkdir(exist_ok=True, parents=True)
     np.save("ours/tmp/c1logits.npy", c1logits)

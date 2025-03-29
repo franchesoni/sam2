@@ -100,8 +100,16 @@ def adjust_logit_map_numpy(data):
     return adjusted_map
 
 
+def adjust_logit_map_numba(logits):
+    c1logits = []
+    for ind, logit in enumerate(logits):
+        print(ind, "of", len(logits), end="\r")
+        c1logits.append(adjust_logit_map_numba_single(logit))
+    return np.stack(c1logits, axis=0)
+
+
 @njit
-def adjust_logit_map_numba(logit_map):
+def adjust_logit_map_numba_single(logit_map):
     """
     Adjusts the input logit map so that the level lines are nested,
     decreasing values as little as possible using Numba for optimization.
