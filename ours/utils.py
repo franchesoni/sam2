@@ -3,6 +3,8 @@ from heapq import heappop, heappush
 
 from PIL import Image
 import numpy as np
+import heapq
+from numba import njit
 
 from sam2.build_sam import build_sam2
 from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator, rle_to_mask
@@ -56,7 +58,7 @@ def generate_masks(path_to_image, image, mask_generator):
     return masks, logits, ious, stability_scores
 
 
-def make_c1(data):
+def adjust_logit_map_numpy(data):
     """
     Adjust the logits so that, when thresholded at 0, the obtained mask has only one 4-connected component.
     To do this, we enforce that there should always exist a monotonically non-increasing path from the maximum to any other pixel.
@@ -95,4 +97,49 @@ def make_c1(data):
                     visited[channel, nrow, ncol] = True
 
     print("- done making c1!")
+    return adjusted_map
+
+
+@njit
+def adjust_logit_map_numba(logit_map):
+    """
+    Adjusts the input logit map so that the level lines are nested,
+    decreasing values as little as possible using Numba for optimization.
+
+    Parameters:
+    - logit_map: numpy array of shape (256, 256)
+
+    Returns:
+    - adjusted_map: numpy array of shape (256, 256)
+    """
+    H, W = logit_map.shape
+    adjusted_map = logit_map.copy()
+    visited = np.zeros((H, W), dtype=np.uint8)
+
+    # Find the seed pixel (maximum value). If multiple maxima, pick the first in raster order.
+    max_index = np.argmax(logit_map)
+    seed_i = max_index // W
+    seed_j = max_index % W
+    seed_value = logit_map[seed_i, seed_j]
+
+    # Initialize the priority queue with the seed pixel
+    heap = [(-seed_value, seed_i, seed_j)]
+    visited[seed_i, seed_j] = True
+
+    while heap:
+        neg_value, i, j = heapq.heappop(heap)
+        current_value = -neg_value  # Convert back to positive
+
+        # Check each of the 4-connected neighbors
+        for di, dj in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            ni, nj = i + di, j + dj
+            if 0 <= ni < H and 0 <= nj < W and not visited[ni, nj]:
+                neighbor_value = adjusted_map[ni, nj]
+                if neighbor_value > current_value:
+                    # Decrease the neighbor's value to the current value
+                    adjusted_map[ni, nj] = current_value
+                # Add the neighbor to the heap for further processing
+                heapq.heappush(heap, (-adjusted_map[ni, nj], ni, nj))
+                visited[ni, nj] = True  # Mark as visited
+
     return adjusted_map

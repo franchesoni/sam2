@@ -3,7 +3,7 @@ from pathlib import Path
 from PIL import Image
 import numpy as np
 
-from .utils import get_mask_generator, generate_masks, make_c1
+from .utils import get_mask_generator, generate_masks, adjust_logit_map_numba
 
 
 def main(img_ind=0):
@@ -27,7 +27,10 @@ def main(img_ind=0):
         None, img, mask_generator
     )
     print("- making logits c1")
-    c1logits = make_c1(logits)
+    c1logits = []
+    for ind, logit in enumerate(logits):
+        print(ind, "of", len(logits), end="\r")
+        c1logits.append(adjust_logit_map_numba(logit))
     print("- saving logits c1")
     Path("ours/tmp").mkdir(exist_ok=True, parents=True)
     np.save("ours/tmp/c1logits.npy", c1logits)
