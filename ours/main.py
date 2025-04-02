@@ -6,7 +6,7 @@ import numpy as np
 from .utils import get_mask_generator, generate_masks, adjust_logit_map_numba
 
 
-def main(img_ind=0):
+def main(img_ind=1):
     print("- loading image")
     image_paths = sorted(list(Path("ours/images").glob("*p512.tiff")))
     image_path = image_paths[img_ind]
@@ -27,5 +27,7 @@ def main(img_ind=0):
         None, img, mask_generator
     )
     np.save("ours/tmp/logits.npy", logits)
+    np.save("ours/tmp/predicted_ious.npy", predicted_ious)
+    np.save("ours/tmp/stability_scores.npy", stability_scores)
 
 main()
