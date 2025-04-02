@@ -26,11 +26,6 @@ def main(img_ind=0):
     masks, logits, predicted_ious, stability_scores = generate_masks(
         None, img, mask_generator
     )
-    print("- making logits c1")
-    c1logits = adjust_logit_map_numba(logits)
-    print("- saving logits c1")
-    Path("ours/tmp").mkdir(exist_ok=True, parents=True)
-    np.save("ours/tmp/c1logits.npy", c1logits)
-
+    np.save("ours/tmp/logits.npy", logits)
 
 main()
