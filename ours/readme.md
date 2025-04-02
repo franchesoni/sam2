@@ -16,7 +16,8 @@
 - `evaluate.ipynb`: can we improve over sam2 predictions?
     - doing binary merging, where the "score" is the mean of the logits on the two regions to be merged for any channel, didn't work very well qualitatively
     - we have merged superpixels to reconstruct the masks and it seems that the scores are slightly better!
-    - now the question is if we can get something better than sam when restricting the number of predicted masks
+    - we evaluated this for c1 logits and for logits. c1 logits are slightly better but they aren't needed, we'll remove them for simplicity
+    - now the question is if we can get something better than sam when restricting the number of predicted masks? yes! indeed refining selected masks (279) with our superpixels (279) improves from 0.819 to 0.835! (in the second image, need to try in the first one too)
 
 
 
