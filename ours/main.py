@@ -23,11 +23,12 @@ def main(img_ind=1):
         device="cuda:1",
     )
     print("- computing masks")
-    masks, logits, predicted_ious, stability_scores = generate_masks(
+    masks, logits, predicted_ious, stability_scores, points = generate_masks(
         None, img, mask_generator
     )
     np.save("ours/tmp/logits.npy", logits)
     np.save("ours/tmp/predicted_ious.npy", predicted_ious)
     np.save("ours/tmp/stability_scores.npy", stability_scores)
+    np.save("ours/tmp/points.npy", points)
 
 main()

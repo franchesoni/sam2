@@ -55,7 +55,8 @@ def generate_masks(path_to_image, image, mask_generator):
         rle_to_mask(rle) for rle in mask_data["rles"]
     ]  # masks
     masks = np.array(mask_data["segmentations"])
-    return masks, logits, ious, stability_scores
+    points = np.array(mask_data["points"])
+    return masks, logits, ious, stability_scores, points
 
 
 def adjust_logit_map_numpy(data):
