@@ -18,7 +18,11 @@
     - we have merged superpixels to reconstruct the masks and it seems that the scores are slightly better!
     - we evaluated this for c1 logits and for logits. c1 logits are slightly better but they aren't needed, we'll remove them for simplicity
     - now the question is if we can get something better than sam when restricting the number of predicted masks? yes! indeed refining selected masks (279) with our superpixels (279) improves from 0.819 to 0.835! (in the second image, need to try in the first one too)
+    - in short, the conclusion is: using superpixels to reconstruct sam masks improves performance and doing partitions does not help, basically because it's hard to know what level of detail to use
 
+Another question follows: can we improve the result of a given prompt prediction by using other prompts?  
+The first attempt would be to use the other prompts to do superpixels and refine the main output.
+The second attempt would be pseudo-labeling: start from the main prompt, which gives a probability map, then update the labeling to have the least loss (pseudo-label), now given the pseudo label, we should update the prediction to minimize the loss, but we can't touch the model, can we? But we can sample points inside and outside the mask and take as estimation the most certain one, if anything changed, relabel and repeat. We could look at the pseudo-labeling "loss" over time and the actual "loss" over time. We don't need to do the sampling, let us work on the grid at first.
 
 
 
